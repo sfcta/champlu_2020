@@ -35,16 +35,18 @@ mymap.setView([37.76889, -122.440997], 13);
 // some important global variables.
 const API_SERVER = 'https://api.sfcta.org/api/';
 const GEO_VIEW = 'taz_boundaries';
-const DATA_VIEW = 'lua2017_final';
+const DATA_VIEW = 'lua2022_final';
 
 const FRAC_COLS = [];
-const YR_LIST = [2010,2015,2020,2025,2030,2035,2040];
+const YR_LIST = [2015, 2020, 2035, 2050];
 
 const INT_COLS = [];
 const DISCRETE_VAR_LIMIT = 10;
 const MISSING_COLOR = '#ccd';
-const COLORRAMP = {SEQ: ['#ffffcc','#3f324f'],
-                    DIV: ['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641']};
+const COLORRAMP = {
+  SEQ: ['#ffffcc', '#3f324f'],
+  DIV: ['#d7191c', '#fdae61', '#ffffbf', '#a6d96a', '#1a9641']
+};
 
 const MIN_BWIDTH = 2;
 const MAX_BWIDTH = 10;
@@ -59,21 +61,23 @@ const BWIDTH_MAP = {
 };
 const MAX_PCTDIFF = 200;
 const CUSTOM_BP_DICT = {
-  'hh': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
-  'job': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
-  'cie': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
-  'med': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
-  'mips': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
-  'pdr': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
-  'ret': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
-  'vis': {'base':[250, 500, 750, 1000], 'diff':[-100, -5, 5, 100], 'pctdiff':[-20, -5, 5, 20]},
+  'hh': { 'base': [250, 500, 750, 1000], 'diff': [-100, -5, 5, 100], 'pctdiff': [-20, -5, 5, 20] },
+  'job': { 'base': [250, 500, 750, 1000], 'diff': [-100, -5, 5, 100], 'pctdiff': [-20, -5, 5, 20] },
+  'cie': { 'base': [250, 500, 750, 1000], 'diff': [-100, -5, 5, 100], 'pctdiff': [-20, -5, 5, 20] },
+  'med': { 'base': [250, 500, 750, 1000], 'diff': [-100, -5, 5, 100], 'pctdiff': [-20, -5, 5, 20] },
+  'mips': { 'base': [250, 500, 750, 1000], 'diff': [-100, -5, 5, 100], 'pctdiff': [-20, -5, 5, 20] },
+  'pdr': { 'base': [250, 500, 750, 1000], 'diff': [-100, -5, 5, 100], 'pctdiff': [-20, -5, 5, 20] },
+  'ret': { 'base': [250, 500, 750, 1000], 'diff': [-100, -5, 5, 100], 'pctdiff': [-20, -5, 5, 20] },
+  'vis': { 'base': [250, 500, 750, 1000], 'diff': [-100, -5, 5, 100], 'pctdiff': [-20, -5, 5, 20] },
+  ru: { 'base': [250, 500, 750, 1000], 'diff': [-100, -5, 5, 100], 'pctdiff': [-20, -5, 5, 20] },
 }
 
-const METRIC_UNITS = {'job':'jobs'};
+const METRIC_UNITS = { 'job': 'jobs' };
 
-const styles = {normal  : {"color": "#3c6", "weight": 4, "opacity": 1.0 },
-                    selected: {"color": "#39f", "weight": 5, "opacity": 1.0 },
-                    popup   : {"color": "#33f", "weight": 10, "opacity": 1.0 }
+const styles = {
+  normal: { "color": "#3c6", "weight": 4, "opacity": 1.0 },
+  selected: { "color": "#39f", "weight": 5, "opacity": 1.0 },
+  popup: { "color": "#33f", "weight": 10, "opacity": 1.0 }
 };
 
 let sel_colorvals, sel_colors, sel_binsflag;
@@ -94,7 +98,7 @@ async function initialPrep() {
 
   console.log('2... ');
   await drawMapFeatures();
-  
+
   console.log('3... ');
   await buildChartHtmlFromData();
 
@@ -124,7 +128,7 @@ async function fetchMapFeatures() {
 // hover panel -------------------
 let infoPanel = L.control();
 
-infoPanel.onAdd = function(map) {
+infoPanel.onAdd = function (map) {
   // create a div with a class "info"
   this._div = L.DomUtil.create('div', 'info-panel-hide');
   return this._div;
@@ -132,33 +136,36 @@ infoPanel.onAdd = function(map) {
 
 function getInfoHtml(geo) {
   let metric_val = null;
-  if (geo.metric !== null) metric_val = (Math.round(geo.metric*100)/100).toLocaleString();
+  if (geo.metric !== null) metric_val = (Math.round(geo.metric * 100) / 100).toLocaleString();
   let base_val = null;
-  if (geo.base !== null) base_val = (Math.round(geo.base*100)/100).toLocaleString();
+  if (geo.base !== null) base_val = (Math.round(geo.base * 100) / 100).toLocaleString();
   let comp_val = null;
-  if (geo.comp !== null) comp_val = (Math.round(geo.comp*100)/100).toLocaleString();
+  if (geo.comp !== null) comp_val = (Math.round(geo.comp * 100) / 100).toLocaleString();
   let bwmetric_val = null;
-  if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric*100)/100).toLocaleString();
+  if (geo.bwmetric !== null) bwmetric_val = (Math.round(geo.bwmetric * 100) / 100).toLocaleString();
   let retval = '<b>TAZ: </b>' + `${geo.taz}<br/>` +
-                '<b>NEIGHBORHOOD: </b>' + `${geo.nhood}<br/><hr>`;
+    '<b>NEIGHBORHOOD: </b>' + `${geo.nhood}<br/><hr>`;
   if (app.comp_check) {
-    retval += `<b>${app.sliderValue[0]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${base_val}<br/>` +
-              `<b>${app.sliderValue[1]}</b> `+`<b>${app.selected_metric.toUpperCase()}: </b>` + `${comp_val}<br/>`;
+    retval += `<b>${app.sliderValue[0]}</b> ` + `<b>${app.selected_metric.toUpperCase()}: </b>` + `${base_val}<br/>` +
+      `<b>${app.sliderValue[1]}</b> ` + `<b>${app.selected_metric.toUpperCase()}: </b>` + `${comp_val}<br/>`;
   }
-  retval += `<b>${app.selected_metric.toUpperCase()}</b>` + 
-            (app.pct_check? '<b> %</b>': '') +
-            (app.comp_check? '<b> Diff: </b>':'<b>: </b>') + 
-            `${metric_val}` + 
-            ((app.pct_check && app.comp_check && metric_val !== null)? '%':''); 
-  return retval; 
+  retval += `<b>${app.selected_metric.toUpperCase()}</b>` +
+    (app.pct_check ? '<b> %</b>' : '') +
+    (app.comp_check ? '<b> Diff: </b>' : '<b>: </b>') +
+    `${metric_val}` +
+    ((app.pct_check && app.comp_check && metric_val !== null) ? '%' : '') + '<br/><hr/>';
+  //  + (app.selected_metric == "ru") ? 'www': `<b>${app.sliderValue[0]} RU:</b> ${geo['ru-base']}<br/>` +
+  //   `<b>${app.sliderValue[1]} RU:</b> ${geo['ru-comp']}<br/>` +
+  // `<b>RU % Diff: </b> ${(Math.round(geo['ru-base'] / geo['ru-comp'] * 100) / 100).toLocaleString()}${((app.pct_check && app.comp_check && metric_val !== null) ? '%' : '')}`;
+  return retval;
 }
 
-infoPanel.update = function(geo) {
+infoPanel.update = function (geo) {
   infoPanel._div.innerHTML = '';
   infoPanel._div.className = 'info-panel';
   if (geo) this._div.innerHTML = getInfoHtml(geo);
 
-  infoPanelTimeout = setTimeout(function() {
+  infoPanelTimeout = setTimeout(function () {
     // use CSS to hide the info-panel
     infoPanel._div.className = 'info-panel-hide';
     // and clear the hover too
@@ -183,7 +190,7 @@ async function getMapData() {
     base_lookup[entry.taz] = entry;
     for (let yr of YR_LIST) {
       for (let met of app.metric_options) {
-        tmp[yr][met.value] += entry[met.value+yr];
+        tmp[yr][met.value] += entry[met.value + yr];
       }
     }
   }
@@ -201,7 +208,7 @@ async function getMapData() {
 let base_lookup;
 let map_vals;
 let bwidth_vals;
-async function drawMapFeatures(queryMapData=true) {
+async function drawMapFeatures(queryMapData = true) {
 
   // create a clean copy of the feature Json
   if (!_featJson) return;
@@ -209,19 +216,19 @@ async function drawMapFeatures(queryMapData=true) {
   let sel_metric = app.selected_metric;
   let base_metric = sel_metric + app.sliderValue[0];
   let comp_metric = sel_metric + app.sliderValue[1];
-  if (base_metric==comp_metric) {
+  if (base_metric == comp_metric) {
     app.comp_check = false;
     app.pct_check = false;
   } else {
     app.comp_check = true;
   }
   prec = (FRAC_COLS.includes(sel_metric) ? 100 : 1);
-  
+
   try {
     if (queryMapData) {
       app.custom_check = false;
       if (base_lookup == undefined) await getMapData();
-      
+
       let map_metric;
       let bwidth_metric;
       map_vals = [];
@@ -233,7 +240,7 @@ async function drawMapFeatures(queryMapData=true) {
           if (bwidth_metric !== null) bwidth_vals.push(bwidth_metric);
         }
         feat['bwmetric'] = bwidth_metric;
-        
+
         map_metric = null;
         if (app.comp_check) {
           if (base_lookup.hasOwnProperty(feat.taz)) {
@@ -241,9 +248,11 @@ async function drawMapFeatures(queryMapData=true) {
             map_metric = feat_entry[comp_metric] - feat_entry[base_metric];
             feat['base'] = feat_entry[base_metric];
             feat['comp'] = feat_entry[comp_metric];
+            feat['ru-base'] = feat_entry['ru' + app.sliderValue[0]];
+            feat['ru-comp'] = feat_entry['ru' + app.sliderValue[1]];
             if (app.pct_check && app.comp_check) {
-              if (feat_entry[base_metric]>0) {
-                map_metric = map_metric*100/feat_entry[base_metric];
+              if (feat_entry[base_metric] > 0) {
+                map_metric = map_metric * 100 / feat_entry[base_metric];
               }
             }
           }
@@ -253,40 +262,40 @@ async function drawMapFeatures(queryMapData=true) {
           }
         }
         if (map_metric !== null) {
-          map_metric = Math.round(map_metric*prec)/prec;
+          map_metric = Math.round(map_metric * prec) / prec;
           map_vals.push(map_metric);
         }
         feat['metric'] = map_metric;
       }
-      map_vals = map_vals.sort((a, b) => a - b);  
-      bwidth_vals = bwidth_vals.sort((a, b) => a - b); 
+      map_vals = map_vals.sort((a, b) => a - b);
+      bwidth_vals = bwidth_vals.sort((a, b) => a - b);
     }
-    
+
     if (map_vals.length > 0) {
       let color_func;
       let sel_colorvals2;
       let bp;
-      
+
       if (queryMapData) {
         sel_colorvals = Array.from(new Set(map_vals)).sort((a, b) => a - b);
-        
+
         //calculate distribution
-        let dist_vals = app.comp_check? map_vals.filter(entry => entry <= MAX_PCTDIFF) : map_vals;
+        let dist_vals = app.comp_check ? map_vals.filter(entry => entry <= MAX_PCTDIFF) : map_vals;
         let x = d3.scaleLinear()
-                .domain([dist_vals[0], dist_vals[dist_vals.length-1]])
+          .domain([dist_vals[0], dist_vals[dist_vals.length - 1]])
         let numticks = 20;
         if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) numticks = sel_colorvals.length;
         let histogram = d3.histogram()
-            .domain(x.domain())
-            .thresholds(x.ticks(numticks));
+          .domain(x.domain())
+          .thresholds(x.ticks(numticks));
         updateDistChart(histogram(dist_vals));
 
-        
+
         if (sel_colorvals.length <= DISCRETE_VAR_LIMIT || INT_COLS.includes(sel_metric)) {
           sel_binsflag = false;
-          color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length-1]+1]));
+          color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals.concat([sel_colorvals[sel_colorvals.length - 1] + 1]));
           sel_colorvals2 = sel_colorvals.slice(0);
-          
+
           app.custom_disable = true;
           app.bp0 = 0;
           app.bp1 = 0;
@@ -294,31 +303,31 @@ async function drawMapFeatures(queryMapData=true) {
           app.bp3 = 0;
           app.bp4 = 0;
           app.bp5 = 1;
-          
+
         } else {
           app.custom_disable = false;
-          
+
           let mode = 'base';
-          if (app.comp_check){
-            if(app.pct_check){
+          if (app.comp_check) {
+            if (app.pct_check) {
               mode = 'pctdiff';
             } else {
               mode = 'diff';
             }
           }
           let custom_bps;
-          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
+          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)) {
             custom_bps = CUSTOM_BP_DICT[sel_metric][mode];
-            (map_vals[0]<custom_bps[0]) ? sel_colorvals = [map_vals[0]].concat(custom_bps): sel_colorvals = [custom_bps[0]-1].concat(custom_bps);
-            (map_vals[map_vals.length-1] > custom_bps[custom_bps.length-1])? sel_colorvals.push(map_vals[map_vals.length-1]): sel_colorvals.push(custom_bps[custom_bps.length-1]+1);
+            (map_vals[0] < custom_bps[0]) ? sel_colorvals = [map_vals[0]].concat(custom_bps) : sel_colorvals = [custom_bps[0] - 1].concat(custom_bps);
+            (map_vals[map_vals.length - 1] > custom_bps[custom_bps.length - 1]) ? sel_colorvals.push(map_vals[map_vals.length - 1]) : sel_colorvals.push(custom_bps[custom_bps.length - 1] + 1);
             app.custom_check = true;
           } else {
             sel_colorvals = getQuantiles(map_vals, app.selected_breaks);
           }
           bp = Array.from(sel_colorvals).sort((a, b) => a - b);
           app.bp0 = bp[0];
-          app.bp5 = bp[bp.length-1];
-          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)){
+          app.bp5 = bp[bp.length - 1];
+          if (CUSTOM_BP_DICT.hasOwnProperty(sel_metric)) {
             app.bp1 = custom_bps[0];
             app.bp2 = custom_bps[1];
             app.bp3 = custom_bps[2];
@@ -326,21 +335,21 @@ async function drawMapFeatures(queryMapData=true) {
             if (custom_bps[0] < app.bp0) app.bp1 = app.bp0;
           } else {
             app.bp1 = bp[1];
-            app.bp4 = bp[bp.length-2];
-            if (app.selected_breaks==3) {
+            app.bp4 = bp[bp.length - 2];
+            if (app.selected_breaks == 3) {
               app.bp2 = app.bp3 = bp[2];
             } else {
               app.bp2 = bp[2];
               app.bp3 = bp[3];
             }
           }
-          
+
 
           sel_colorvals = Array.from(new Set(sel_colorvals)).sort((a, b) => a - b);
           updateColorScheme(sel_colorvals);
-          sel_binsflag = true; 
+          sel_binsflag = true;
           color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
-          sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
+          sel_colorvals2 = sel_colorvals.slice(0, sel_colorvals.length - 1);
         }
 
         app.bwcustom_disable = false;
@@ -352,28 +361,28 @@ async function drawMapFeatures(queryMapData=true) {
         app.bwbp3 = bp[3];
         app.bwbp4 = bp[4];
         app.bwbp5 = bp[5];
-        sel_bwvals = Array.from(new Set(sel_bwvals)).sort((a, b) => a - b); 
+        sel_bwvals = Array.from(new Set(sel_bwvals)).sort((a, b) => a - b);
       } else {
         sel_colorvals = new Set([app.bp0, app.bp1, app.bp2, app.bp3, app.bp4, app.bp5]);
         sel_colorvals = Array.from(sel_colorvals).sort((a, b) => a - b);
         updateColorScheme(sel_colorvals);
-        sel_binsflag = true; 
+        sel_binsflag = true;
         color_func = chroma.scale(app.selected_colorscheme).mode(getColorMode(app.selected_colorscheme)).classes(sel_colorvals);
-        sel_colorvals2 = sel_colorvals.slice(0,sel_colorvals.length-1);
-        
+        sel_colorvals2 = sel_colorvals.slice(0, sel_colorvals.length - 1);
+
         sel_bwvals = new Set([app.bwbp0, app.bwbp1, app.bwbp2, app.bwbp3, app.bwbp4, app.bwbp5]);
         sel_bwvals = Array.from(sel_bwvals).sort((a, b) => a - b);
       }
 
       let bw_widths;
       if (app.bwidth_check) {
-        bw_widths = BWIDTH_MAP[sel_bwvals.length]; 
+        bw_widths = BWIDTH_MAP[sel_bwvals.length];
         for (let feat of cleanFeatures) {
           if (feat['bwmetric'] !== null) {
-            if (sel_bwvals.length <= 2){
+            if (sel_bwvals.length <= 2) {
               feat['bwmetric_scaled'] = bw_widths;
             } else {
-              for (var i = 0; i < sel_bwvals.length-1; i++) {
+              for (var i = 0; i < sel_bwvals.length - 1; i++) {
                 if (feat['bwmetric'] <= sel_bwvals[i + 1]) {
                   feat['bwmetric_scaled'] = bw_widths[i];
                   break;
@@ -388,43 +397,43 @@ async function drawMapFeatures(queryMapData=true) {
       }
 
       sel_colors = [];
-      for(let i of sel_colorvals2) {
+      for (let i of sel_colorvals2) {
         sel_colors.push(color_func(i).hex());
       }
- 
+
       if (geoLayer) mymap.removeLayer(geoLayer);
       if (mapLegend) mymap.removeControl(mapLegend);
       geoLayer = L.geoJSON(cleanFeatures, {
         style: styleByMetricColor,
-        onEachFeature: function(feature, layer) {
+        onEachFeature: function (feature, layer) {
           layer.on({
             mouseover: hoverFeature,
             click: clickedOnFeature,
-            });
+          });
         },
       });
       geoLayer.addTo(mymap);
 
       mapLegend = L.control({ position: 'bottomright' });
-      mapLegend.onAdd = function(map) {
+      mapLegend.onAdd = function (map) {
         let div = L.DomUtil.create('div', 'info legend');
         let legHTML = getLegHTML(
           sel_colorvals,
           sel_colors,
           sel_binsflag,
-          (app.pct_check && app.comp_check)? '%': ''
+          (app.pct_check && app.comp_check) ? '%' : ''
         );
-        legHTML = '<h4>' + sel_metric.toUpperCase() + (app.pct_check? ' % Diff': (METRIC_UNITS.hasOwnProperty(sel_metric)? (' (' + METRIC_UNITS[sel_metric] + ')') : '')) +
-                  '</h4>' + legHTML;
+        legHTML = '<h4>' + sel_metric.toUpperCase() + (app.pct_check ? ' % Diff' : (METRIC_UNITS.hasOwnProperty(sel_metric) ? (' (' + METRIC_UNITS[sel_metric] + ')') : '')) +
+          '</h4>' + legHTML;
         if (app.bwidth_check) {
-          legHTML += '<hr/>' + '<h4>' + app.selected_bwidth.toUpperCase() +  '</h4>';
+          legHTML += '<hr/>' + '<h4>' + app.selected_bwidth.toUpperCase() + '</h4>';
           legHTML += getBWLegHTML(sel_bwvals, bw_widths);
         }
         div.innerHTML = legHTML;
         return div;
       };
       mapLegend.addTo(mymap);
-      
+
       if (selectedGeo) {
         if (base_lookup.hasOwnProperty(selectedGeo.feature.taz)) {
           buildChartHtmlFromData(selectedGeo.feature.taz);
@@ -438,33 +447,33 @@ async function drawMapFeatures(queryMapData=true) {
       }
     }
 
-  } catch(error) {
+  } catch (error) {
     console.log(error);
   }
 }
 
 function updateColorScheme(colorvals) {
-  if (colorvals[0] * colorvals[colorvals.length-1] >= 0) {
+  if (colorvals[0] * colorvals[colorvals.length - 1] >= 0) {
     app.selected_colorscheme = COLORRAMP.SEQ;
   } else {
     app.selected_colorscheme = COLORRAMP.DIV;
-  } 
+  }
 }
 
 function styleByMetricColor(feat) {
   let color = getColorFromVal(
-              feat['metric'],
-              sel_colorvals,
-              sel_colors,
-              sel_binsflag
-              );
+    feat['metric'],
+    sel_colorvals,
+    sel_colors,
+    sel_binsflag
+  );
   if (!color) color = MISSING_COLOR;
   let fo = 0.6;
-  if (feat['metric']==0) {
+  if (feat['metric'] == 0) {
     fo = 0;
   }
   if (!app.bwidth_check) {
-    return { fillColor: color, opacity: 0.5, weight: 0.5, fillOpacity: fo, color: '#fff'};
+    return { fillColor: color, opacity: 0.5, weight: 0.5, fillOpacity: fo, color: '#fff' };
   } else {
     return { color: color, weight: feat['bwmetric_scaled'], opacity: 1.0 };
   }
@@ -476,7 +485,7 @@ let oldHoverTarget;
 function hoverFeature(e) {
   clearTimeout(infoPanelTimeout);
   infoPanel.update(e.target.feature);
-  
+
   // don't do anything else if the feature is already clicked
   if (selGeoId === e.target.feature.taz) return;
 
@@ -489,7 +498,7 @@ function hoverFeature(e) {
   let highlightedGeo = e.target;
   highlightedGeo.bringToFront();
   highlightedGeo.setStyle(styles.selected);
-  oldHoverTarget = e.target; 
+  oldHoverTarget = e.target;
 }
 
 function highlightSelectedSegment() {
@@ -503,7 +512,7 @@ function highlightSelectedSegment() {
         selectedGeo = e;
         return;
       }
-    } catch(error) {}
+    } catch (error) { }
   });
 }
 
@@ -513,44 +522,44 @@ function updateDistChart(bins) {
   let data = [];
   distLabels = [];
   for (let b of bins) {
-    let x0 = Math.round(b.x0*prec)/prec;
-    let x1 = Math.round(b.x1*prec)/prec;
-    data.push({x:x0, y:b.length});
+    let x0 = Math.round(b.x0 * prec) / prec;
+    let x1 = Math.round(b.x1 * prec) / prec;
+    data.push({ x: x0, y: b.length });
     distLabels.push(x0 + '-' + x1);
   }
 
   if (distChart) {
     distChart.setData(data);
   } else {
-      distChart = new Morris.Area({
-        // ID of the element in which to draw the chart.
-        element: 'dist-chart',
-        data: data,
-        // The name of the data record attribute that contains x-values.
-        xkey: 'x',
-        // A list of names of data record attributes that contain y-values.
-        ykeys: 'y',
-        ymin: 0,
-        labels: ['Freq'],
-        lineColors: ['#1fc231'],
-        xLabels: 'x',
-        xLabelAngle: 25,
-        xLabelFormat: binFmt,
-        //yLabelFormat: yFmt,
-        hideHover: true,
-        parseTime: false,
-        fillOpacity: 0.4,
-        pointSize: 1,
-        behaveLikeLine: false,
-        eventStrokeWidth: 2,
-        eventLineColors: ['#ccc'],
-      });
+    distChart = new Morris.Area({
+      // ID of the element in which to draw the chart.
+      element: 'dist-chart',
+      data: data,
+      // The name of the data record attribute that contains x-values.
+      xkey: 'x',
+      // A list of names of data record attributes that contain y-values.
+      ykeys: 'y',
+      ymin: 0,
+      labels: ['Freq'],
+      lineColors: ['#1fc231'],
+      xLabels: 'x',
+      xLabelAngle: 25,
+      xLabelFormat: binFmt,
+      //yLabelFormat: yFmt,
+      hideHover: true,
+      parseTime: false,
+      fillOpacity: 0.4,
+      pointSize: 1,
+      behaveLikeLine: false,
+      eventStrokeWidth: 2,
+      eventLineColors: ['#ccc'],
+    });
   }
 
 }
 
 function binFmt(x) {
-  return distLabels[x.x] + ((app.pct_check && app.comp_check)? '%':'');
+  return distLabels[x.x] + ((app.pct_check && app.comp_check) ? '%' : '');
 }
 
 let selGeoId;
@@ -588,7 +597,7 @@ function showGeoDetails(latlng) {
     .addTo(mymap);
 
   // Revert to overall chart when no segment selected
-  popSelGeo.on('remove', function(e) {
+  popSelGeo.on('remove', function (e) {
     resetPopGeo();
   });
 }
@@ -609,10 +618,10 @@ function buildChartHtmlFromData(geoid = null) {
       let row = {};
       row['year'] = yr.toString();
       for (let met of app.metric_options) {
-        row[met.value] = base_lookup[geoid][met.value+yr];
+        row[met.value] = base_lookup[geoid][met.value + yr];
       }
       selgeodata.push(row);
-    } 
+    }
     trendChart = new Morris.Line({
       data: selgeodata,
       element: 'longchart',
@@ -652,17 +661,19 @@ let scnSlider = {
   lazy: true,
   height: 3,
   //width: 'auto',
-  style: {marginTop: '10px'},
+  style: { marginTop: '10px' },
   processDragable: true,
   eventType: 'auto',
-  piecewise: true,
+  marks: true,
   piecewiseLabel: true,
   tooltip: 'always',
-  tooltipDir: 'bottom',
-  tooltipStyle: { backgroundColor: '#eaae00', borderColor: '#eaae00', marginLeft:'5px'},
-  processStyle: { backgroundColor: "#eaae00"},
-  labelStyle: {color: "#ccc", marginLeft:'5px', marginTop:'5px'},
-  piecewiseStyle: {backgroundColor: '#ccc',width: '8px',height: '8px',visibility: 'visible'},
+  tooltipPlacement: 'bottom',
+  tooltipStyle: { backgroundColor: '#eaae00', borderColor: '#eaae00', marginLeft: '5px' },
+  processStyle: { backgroundColor: "#eaae00" },
+  labelStyle: { color: "#ccc", marginLeft: '5px' },
+  //stepStyle: {boxShadow: '0 0 0 2px #eaae00'},
+  stepActiveStyle: { boxShadow: '0 0 0 2px #eaae00' },
+  dotStyle: { border: '2px solid #eaae00' },
 };
 
 function bp1Changed(thing) {
@@ -726,14 +737,14 @@ async function updateMap(thing) {
   }
 }
 function customBreakPoints(thing) {
-  if(thing) {
+  if (thing) {
     app.isUpdActive = false;
   } else {
     drawMapFeatures();
   }
 }
 function customBWBreakPoints(thing) {
-  if(thing) {
+  if (thing) {
     app.isBWUpdActive = false;
   } else {
     drawMapFeatures();
@@ -781,7 +792,7 @@ let app = new Vue({
     bp3: 0.0,
     bp4: 0.0,
     bp5: 0.0,
-    
+
     isBWUpdActive: false,
     bwcustom_check: false,
     bwcustom_disable: true,
@@ -791,27 +802,28 @@ let app = new Vue({
     bwbp3: 0.0,
     bwbp4: 0.0,
     bwbp5: 0.0,
-    
+
     selected_metric: 'hh',
     metric_options: [
-    {text: 'Households', value: 'hh'},
-    {text: 'CIE_EMP', value: 'cie'},
-    {text: 'MED_EMP', value: 'med'},
-    {text: 'MIPS_EMP', value: 'mips'},
-    {text: 'PDR_EMP', value: 'pdr'},
-    {text: 'RET_EMP', value: 'ret'},
-    {text: 'VIS_EMP', value: 'vis'},
-    {text: 'TOT_EMP', value: 'job'},
+      { text: 'Households', value: 'hh' },
+      { text: 'CIE_EMP', value: 'cie' },
+      { text: 'MED_EMP', value: 'med' },
+      { text: 'MIPS_EMP', value: 'mips' },
+      { text: 'PDR_EMP', value: 'pdr' },
+      { text: 'RET_EMP', value: 'ret' },
+      { text: 'VIS_EMP', value: 'vis' },
+      { text: 'TOT_EMP', value: 'job' },
+      { text: 'RES_UNITS', value: 'ru' }
     ],
     chartTitle: 'HH TREND',
     chartSubtitle: chart_deftitle,
-    
+
     scnSlider: scnSlider,
-    sliderValue: [YR_LIST[1],YR_LIST[YR_LIST.length-1]],
+    sliderValue: [YR_LIST[1], YR_LIST[YR_LIST.length - 1]],
 
     selected_bwidth: bwidth_metric_list[0],
-    bwidth_options: [],    
-    
+    bwidth_options: [],
+
     selected_colorscheme: COLORRAMP.DIV,
     modeMap: {
       '#ffffcc,#663399': 'lch',
@@ -823,16 +835,16 @@ let app = new Vue({
 
     selected_breaks: 5,
     break_options: [
-    {text: 'Tertiles (3)', value: 3},
-    {text: 'Quartiles (4)', value: 4},
-    {text: 'Quintiles (5)', value: 5},
-    ]      
+      { text: 'Tertiles (3)', value: 3 },
+      { text: 'Quartiles (4)', value: 4 },
+      { text: 'Quintiles (5)', value: 5 },
+    ]
   },
   watch: {
     sliderValue: selectionChanged,
     selected_metric: selectionChanged,
     pct_check: selectionChanged,
-    
+
     //selected_colorscheme: colorschemeChanged,
     bp1: bp1Changed,
     bp2: bp2Changed,
@@ -873,7 +885,7 @@ function clickedShowHide(e) {
   app.isPanelHidden = slideapp.isPanelHidden;
   // leaflet map needs to be force-recentered, and it is slow.
   for (let delay of [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]) {
-    setTimeout(function() {
+    setTimeout(function () {
       mymap.invalidateSize()
     }, delay)
   }
@@ -900,7 +912,7 @@ let helpPanel = new Vue({
   methods: {
     clickToggleHelp: clickToggleHelp,
   },
-  mounted: function() {
+  mounted: function () {
     document.addEventListener('keydown', e => {
       if (this.showHelp && e.keyCode == 27) {
         clickToggleHelp();
